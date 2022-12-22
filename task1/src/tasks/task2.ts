@@ -1,11 +1,10 @@
 import fs from 'fs';
 import csv from 'csvtojson';
 
-const booksReadStream = fs.createReadStream('./src/csv/books.csv');
-const booksWriteStream = fs.createWriteStream('./src/csv/books.txt');
-
-export function task2() {
+const convertCSVToJSON = (readPath: string, writePath: string) => {
   console.log('TASK1.2 started...\n');
+  const booksReadStream = fs.createReadStream(readPath);
+  const booksWriteStream = fs.createWriteStream(writePath);
 
   booksReadStream
     .on('error', (err: Error) => console.error('Error while ReadStream: ', err.message))
@@ -23,6 +22,9 @@ export function task2() {
     .on('close', () => {
       console.log('TASK1.2 finished!\n');
     });
-}
+};
 
-task2();
+const READ_PATH = './src/csv/books.csv';
+const WRITE_PATH = './src/csv/books.txt';
+
+convertCSVToJSON(READ_PATH, WRITE_PATH);
