@@ -1,11 +1,15 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 import express, { Request, Response } from 'express';
+import { ValidatedRequest } from 'express-joi-validation';
 import { v4 as uuid } from 'uuid';
 import { User } from './types/User';
 import { getAutoSuggestUsers } from './utils/getAutoSuggestUsers';
+import { UserRequestSchema, validator } from './middleware/validator';
+import { UserValidationSchema } from './schemas/User';
 
 const app = express();
+
 const PORT = process.env.API_PORT || 3000;
 
 export let users: User[] = [
@@ -39,25 +43,27 @@ app.get('/user/:id', (req: Request, res: Response) => {
     res.json(userById);
 });
 
-app.post('/user', (req: Request, res: Response) => {
-    const user: User = { ...req.body, id: uuid() };
-    users.push(user);
-    res.status(201);
-    res.send(`User with login ${user.login} successfully created`);
-});
-
-app.put('/user/:id', (req: Request, res: Response) => {
-    const { id } = req.user;
-    const userFromBody = req.body;
-    users = users.map((user: User) => {
-        if (user.id === id) {
-            return userFromBody;
-        }
-
-        return user;
+app.post('/user', validator.body(UserValidationSchema),
+    (req: ValidatedRequest<UserRequestSchema>, res: Response) => {
+        const user: User = { ...req.body, id: uuid() };
+        users.push(user);
+        res.status(201);
+        res.send(`User with id ${user.id} successfully created`);
     });
-    res.json(`User with id ${id} successfully edited`);
-});
+
+app.put('/user/:id', validator.body(UserValidationSchema),
+    (req: ValidatedRequest<UserRequestSchema>, res: Response) => {
+        const { id } = req.user;
+        const userFromBody = req.body;
+        users = users.map((user: User) => {
+            if (user.id === id) {
+                return { ...userFromBody, id };
+            }
+
+            return user;
+        });
+        res.json(`User with id ${id} successfully edited`);
+    });
 
 app.delete('/user/:id', (req: Request, res: Response) => {
     const { id } = req.user;
@@ -71,10 +77,9 @@ app.delete('/user/:id', (req: Request, res: Response) => {
     res.json(`User with id ${id} successfully deleted`);
 });
 
-// Error handling
-// app.use((err, req, res, next) => {
-//     res.send('Something went wrong');
-// });
+app.use((req, res) => {
+    res.status(404).json({ message: 'Path not found' });
+});
 
 app.listen(PORT, () => {
     console.log(`Server was started at port ${PORT}`);
