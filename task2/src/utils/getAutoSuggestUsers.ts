@@ -1,34 +1,42 @@
 import { User } from '../types/User';
 import { users } from '../index';
 
-export const getAutoSuggestUsers = (loginSubString: string, limit: string): User[] => {
-    const initUsers = [...users];
-
-    // FILTER BY LOGIN SUBSTRING
-    const filteredUsers = initUsers.filter((user: User) => {
+const filterUsersByLoginString = (usersArr: User[], str: string): User[] => {
+    return usersArr.filter((user: User) => {
         const loginLower = user.login.toLowerCase();
-        const loginSubStringLower = loginSubString.toLowerCase();
+        const loginSubStringLower = str.toLowerCase();
 
-        if (loginLower.includes(loginSubStringLower)) {
-            return true;
-        }
-
-        return false;
+        return loginLower.includes(loginSubStringLower);
     });
+};
 
-    // SORT (Aa-Zz) BY LOGIN
-    const sortedUsers = [...filteredUsers].sort((user: User, nextUser: User) => {
+const sortUsersByLoginString = (usersArr: User[]): User[] => {
+    return [...usersArr].sort((user: User, nextUser: User) => {
         return user.login.localeCompare(nextUser.login);
     });
+};
 
-    // LIMIT
-    const limitedUsers = sortedUsers.filter((user: User, index) => {
+const limitUsersByParam = (usersArr: User[], limit: string): User[] => {
+    return usersArr.filter((user: User, index) => {
         if (index < Number(limit)) {
             return true;
         }
 
         return false;
     });
+};
+
+export const getAutoSuggestUsers = (loginSubString: string, limit: string): User[] => {
+    const initUsers = [...users];
+
+    // FILTER BY LOGIN SUBSTRING
+    const filteredUsers = filterUsersByLoginString(initUsers, loginSubString);
+
+    // SORT (Aa-Zz) BY LOGIN
+    const sortedUsers = sortUsersByLoginString(filteredUsers);
+
+    // LIMIT BY PARAM
+    const limitedUsers = limitUsersByParam(sortedUsers, limit);
 
     return limitedUsers;
 };
