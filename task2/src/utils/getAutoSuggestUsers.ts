@@ -1,5 +1,5 @@
 import { User } from '../types/User';
-import { users } from '../index';
+import { users } from '../router/userRouter';
 
 const filterUsersByLoginString = (usersArr: User[], str: string): User[] => {
     return usersArr.filter((user: User) => {
