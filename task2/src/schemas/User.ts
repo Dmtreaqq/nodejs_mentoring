@@ -7,7 +7,7 @@ export const UserValidationSchema = Joi.object({
         .required(),
     login: Joi.string().required(),
     password: Joi.string()
-        .pattern(new RegExp('^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$'))
+        .regex(/^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)$/)
         .messages({
             'string.pattern.base': 'Password must contain letters and numbers'
         })

@@ -15,10 +15,14 @@ export let users: User[] = [
     { age: 20, isDeleted: false, login: 'Daniel', password: 'mod', id: uuid() }
 ];
 
+const findUserById = (id: string) => {
+    return users.find((user) => user.id === id);
+};
+
 export const userRouter = express.Router();
 
 userRouter.param('id', (req: Request, res: Response, next, id) => {
-    const userById = users.find((user) => user.id === id);
+    const userById = findUserById(id);
     if (userById) req.user = userById;
     next();
 });
@@ -43,11 +47,23 @@ userRouter.route('/users')
 userRouter.route('/users/:id')
     .get((req: Request, res: Response) => {
         const userById = req.user;
+        const { id } = req.params;
+
+        if (!userById) {
+            res.status(404).send({ message: `User with id ${id} was not found` });
+        }
+
         res.json(userById);
     })
     .put(validator.body(UserValidationSchema),
         (req: ValidatedRequest<UserRequestSchema>, res: Response) => {
-            const { id } = req.user;
+            const userById = req.user;
+            const { id } = req.params;
+
+            if (!userById) {
+                res.status(404).send({ message: `User with id ${id} was not found` });
+            }
+
             const userFromBody = req.body;
             users = users.map((user: User) => {
                 if (user.id === id) {
@@ -59,7 +75,13 @@ userRouter.route('/users/:id')
             res.json(`User with id ${id} successfully edited`);
         })
     .delete((req: Request, res: Response) => {
-        const { id } = req.user;
+        const userById = req.user;
+        const { id } = req.params;
+
+        if (!userById) {
+            res.status(404).send({ message: `User with id ${id} was not found` });
+        }
+
         users = users.map((user: User) => {
             if (user.id === id) {
                 return { ...user, isDeleted: true };

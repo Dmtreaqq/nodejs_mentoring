@@ -1,6 +1,23 @@
 import { User } from '../types/User';
 import { users } from '../router/userRouter';
 
+// export const getUsers = (usersArr: User[], limit: string, loginSubString: string) => {
+//     let i = 0;
+//     const resultUsers: User[] = [];
+//     const loginSubStringLower = loginSubString.toLocaleLowerCase();
+//     while (i < usersArr.length && users.length !== Number(limit)) {
+//         const user: User = usersArr[i];
+//         const loginLower = user.login.toLocaleLowerCase();
+//
+//         if (loginLower.includes(loginSubStringLower)) {
+//             resultUsers.push(user);
+//         }
+//
+//         i++;
+//     }
+//     return resultUsers.sort((user: User, nextUser: User) => user.login.localeCompare(nextUser.login));
+// };
+
 const filterUsersByLoginString = (usersArr: User[], str: string): User[] => {
     return usersArr.filter((user: User) => {
         const loginLower = user.login.toLowerCase();
@@ -28,14 +45,8 @@ const limitUsersByParam = (usersArr: User[], limit: string): User[] => {
 
 export const getAutoSuggestUsers = (loginSubString: string, limit: string): User[] => {
     const initUsers = [...users];
-
-    // FILTER BY LOGIN SUBSTRING
     const filteredUsers = filterUsersByLoginString(initUsers, loginSubString);
-
-    // SORT (Aa-Zz) BY LOGIN
     const sortedUsers = sortUsersByLoginString(filteredUsers);
-
-    // LIMIT BY PARAM
     const limitedUsers = limitUsersByParam(sortedUsers, limit);
 
     return limitedUsers;
