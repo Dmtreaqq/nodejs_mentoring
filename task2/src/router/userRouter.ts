@@ -5,6 +5,7 @@ import { UserValidationSchema } from '../schemas/User';
 import { ValidatedRequest } from 'express-joi-validation';
 import { User } from '../types/User';
 import { v4 as uuid } from 'uuid';
+import { validateDefaultQueryParams } from '../middleware/validateDefaultQueryParams';
 
 export let users: User[] = [
     { age: 23, isDeleted: false, login: 'Dmytro', password: 'admin', id: uuid() },
@@ -28,10 +29,8 @@ userRouter.param('id', (req: Request, res: Response, next, id) => {
 });
 
 userRouter.route('/users')
-    .get((req: Request, res: Response) => {
-        let { limit, filter } = req.query;
-        if (!limit) limit = '10';
-        if (!filter) filter = '';
+    .get(validateDefaultQueryParams, (req: Request, res: Response) => {
+        const { limit, filter } = req.query;
         const suggestedUsers = getAutoSuggestUsers(String(filter), String(limit));
 
         res.json(suggestedUsers);
