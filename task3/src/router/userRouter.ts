@@ -1,93 +1,130 @@
 import express, { Request, Response } from 'express';
-import { getAutoSuggestUsers } from '../utils/getAutoSuggestUsers';
+import { v4 as uuid } from 'uuid';
+import { Op } from 'sequelize';
+import { ValidatedRequest } from 'express-joi-validation';
+import { UserModel } from '../models/UserModel';
 import { UserRequestSchema, validator } from '../middleware/validator';
 import { UserValidationSchema } from '../schemas/User';
-import { ValidatedRequest } from 'express-joi-validation';
 import { User } from '../types/User';
-import { v4 as uuid } from 'uuid';
 import { validateDefaultQueryParams } from '../middleware/validateDefaultQueryParams';
-
-export let users: User[] = [
-    { age: 23, isDeleted: false, login: 'Dmytro', password: 'admin', id: uuid() },
-    { age: 24, isDeleted: false, login: 'Pavlo', password: 'mod', id: uuid() },
-    { age: 27, isDeleted: false, login: 'Oleh', password: 'guest', id: uuid() },
-    { age: 18, isDeleted: false, login: 'Zekora', password: 'guest', id: uuid() },
-    { age: 44, isDeleted: false, login: 'Artem', password: 'guest', id: uuid() },
-    { age: 20, isDeleted: false, login: 'Daniel', password: 'mod', id: uuid() }
-];
-
-const findUserById = (id: string) => {
-    return users.find((user) => user.id === id);
-};
 
 export const userRouter = express.Router();
 
-userRouter.param('id', (req: Request, res: Response, next, id) => {
-    const userById = findUserById(id);
-    if (userById) req.user = userById;
+userRouter.param('id', async (req: Request, res: Response, next, id) => {
+    const userFromDb = await UserModel.findByPk(id);
+    const userById = userFromDb?.dataValues;
+    const mappedUserById: User = {
+        id: userById.id,
+        age: userById.age,
+        login: userById.login,
+        password: userById.password,
+        isDeleted: userById.is_deleted
+    };
+
+    if (userById) req.user = mappedUserById;
     next();
 });
 
 userRouter.route('/users')
-    .get(validateDefaultQueryParams, (req: Request, res: Response) => {
+    .get(validateDefaultQueryParams, async (req: Request, res: Response) => {
         const { limit, filter } = req.query;
-        const suggestedUsers = getAutoSuggestUsers(String(filter), String(limit));
+        // const suggestedUsers = getAutoSuggestUsers(String(filter), String(limit));
 
-        res.json(suggestedUsers);
+        const usersFromDB = await UserModel.findAll({
+            where: {
+                login: {
+                    [Op.substring]: String(filter)
+                }
+            },
+            order: ['login'],
+            limit: Number(limit)
+        });
+
+
+        const response = usersFromDB.map((user): User => ({
+            id: user.dataValues.id,
+            age: user.dataValues.age,
+            login: user.dataValues.login,
+            password: user.dataValues.password,
+            isDeleted: user.dataValues.is_deleted
+        }));
+
+        res.json(response);
     })
     .post(validator.body(UserValidationSchema),
-        (req: ValidatedRequest<UserRequestSchema>, res: Response) => {
+        async (req: ValidatedRequest<UserRequestSchema>, res: Response) => {
             const user: User = { ...req.body, id: uuid() };
-            users.push(user);
+            await UserModel.create({
+                id: user.id,
+                login: user.login,
+                password: user.password,
+                age: user.age,
+                is_deleted: user.isDeleted
+            });
             res.status(201);
             res.send(`User with id ${user.id} successfully created`);
         });
 
 userRouter.route('/users/:id')
-    .get((req: Request, res: Response) => {
+    .get(async (req: Request, res: Response) => {
         const userById = req.user;
         const { id } = req.params;
 
         if (!userById) {
-            res.status(404).send({ message: `User with id ${id} was not found` });
+            res.status(404);
+            return res.send({ message: `User with id ${id} was not found` });
         }
 
-        res.json(userById);
+        const response: User = {
+            id: userById.id,
+            age: userById.age,
+            isDeleted: userById.isDeleted,
+            login: userById.login,
+            password: userById.password
+        };
+
+        res.json(response);
     })
     .put(validator.body(UserValidationSchema),
-        (req: ValidatedRequest<UserRequestSchema>, res: Response) => {
+        async (req: ValidatedRequest<UserRequestSchema>, res: Response) => {
             const userById = req.user;
-            const { id } = req.params;
+            const id = userById.id;
 
             if (!userById) {
-                res.status(404).send({ message: `User with id ${id} was not found` });
+                res.status(404);
+                return res.send({ message: `User with id ${id} was not found` });
             }
 
+            const userFromDb = await UserModel.findByPk(id);
             const userFromBody = req.body;
-            users = users.map((user: User) => {
-                if (user.id === id) {
-                    return { ...userFromBody, id };
-                }
 
-                return user;
+            await userFromDb?.update({
+                age: userFromBody.age,
+                is_deleted: userFromBody.isDeleted,
+                login: userFromBody.login,
+                password: userFromBody.password
             });
+
             res.json(`User with id ${id} successfully edited`);
         })
-    .delete((req: Request, res: Response) => {
+    .delete(async (req: Request, res: Response) => {
         const userById = req.user;
-        const { id } = req.params;
+        const id = userById.id;
 
         if (!userById) {
-            res.status(404).send({ message: `User with id ${id} was not found` });
+            res.status(404);
+            return res.send({ message: `User with id ${id} was not found` });
         }
 
-        users = users.map((user: User) => {
-            if (user.id === id) {
-                return { ...user, isDeleted: true };
-            }
+        const userFromDb = await UserModel.findByPk(id);
 
-            return user;
+        await userFromDb?.update({
+            age: userById.age,
+            is_deleted: true,
+            login: userById.login,
+            password: userById.password
         });
+
         res.json(`User with id ${id} successfully deleted`);
     });
 

@@ -1,5 +1,4 @@
 import { User } from '../types/User';
-import { users } from '../router/userRouter';
 
 // export const getUsers = (usersArr: User[], limit: string, loginSubString: string) => {
 //     let i = 0;
@@ -43,7 +42,7 @@ const limitUsersByParam = (usersArr: User[], limit: string): User[] => {
     });
 };
 
-export const getAutoSuggestUsers = (loginSubString: string, limit: string): User[] => {
+export const getAutoSuggestUsers = (users: User[], loginSubString: string, limit: string): User[] => {
     const initUsers = [...users];
     const filteredUsers = filterUsersByLoginString(initUsers, loginSubString);
     const sortedUsers = sortUsersByLoginString(filteredUsers);
