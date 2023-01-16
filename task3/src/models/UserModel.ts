@@ -1,4 +1,4 @@
-import { DataTypes, Sequelize } from 'sequelize';
+import { Sequelize, Model, DataTypes, InferAttributes, InferCreationAttributes } from 'sequelize';
 import config from '../config';
 
 export const sequelize = new Sequelize({
@@ -9,7 +9,15 @@ export const sequelize = new Sequelize({
     dialect: 'postgres'
 });
 
-export const UserModel = sequelize.define('user', {
+export interface IUserModel extends Model<InferAttributes<IUserModel>, InferCreationAttributes<IUserModel>> {
+  id: string;
+  login: string;
+  password: string;
+  age: number;
+  is_deleted: boolean;
+}
+
+export const UserModel = sequelize.define<IUserModel>('user', {
     id: {
         type: DataTypes.STRING,
         allowNull: false,

@@ -1,8 +1,9 @@
+import { IUserModel } from '../models/UserModel';
 import { User } from '../types/User';
 import EntityDataMapperService from './entityDataMapperService';
 
 class UserDataMapperService extends EntityDataMapperService {
-    toService(dbUser: any): User {
+    toService(dbUser: IUserModel): User {
         return {
             id: dbUser.id,
             age: dbUser.age,

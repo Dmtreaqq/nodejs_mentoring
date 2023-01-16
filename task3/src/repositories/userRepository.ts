@@ -1,26 +1,42 @@
-import { Model, Op } from 'sequelize';
-import { UserModel } from '../models/UserModel';
+import { Op, ModelStatic } from 'sequelize';
+import { IUserModel } from '../models/UserModel';
+import EntityDataMapperService from '../services/entityDataMapperService';
+import { User } from '../types/User';
 
-export const findAllUsersByLogin = async (filter: string, limit: string) => {
-    return await UserModel.findAll({
-        where: {
-            login: {
-                [Op.substring]: filter
-            }
-        },
-        order: ['login'],
-        limit: Number(limit)
-    });
-};
+export default class UserRepository {
+    private model: ModelStatic<IUserModel>;
+    private mapper: EntityDataMapperService;
 
-export const findUserById = async (id: string) => {
-    return await UserModel.findByPk(id);
-};
+    constructor(userModel: ModelStatic<IUserModel>, userMapper: EntityDataMapperService) {
+        this.model = userModel;
+        this.mapper = userMapper;
+    }
 
-export const createUser = async (dbUser: any) => {
-    await UserModel.create(dbUser);
-};
+    async findAllUsersByLogin(filter: string, limit: string): Promise<User[]> {
+        const users = await this.model.findAll({
+            where: {
+                login: {
+                    [Op.substring]: filter
+                }
+            },
+            order: ['login'],
+            limit: Number(limit)
+        });
 
-export const updateUser = async (user: Model<any, any> | null, userColumnsToUpdate: any) => {
-    await user?.update(userColumnsToUpdate);
-};
+        return users.map(this.mapper.toService);
+    }
+
+    async findUserById(id: string): Promise<User> {
+        const user = await this.model.findByPk(id);
+        return this.mapper.toService(user);
+    }
+
+    async createUser(user: User): Promise<void> {
+        await this.model.create(this.mapper.toDataBase(user));
+    }
+
+    async updateUser(id: string, userColumnsToUpdate: User): Promise<void> {
+        const user = await this.model.findByPk(id);
+        await user?.update(this.mapper.toDataBase(userColumnsToUpdate));
+    }
+}

@@ -1,12 +1,13 @@
 import UserDataMapperService from './userDataMapperService';
-import { createUser, findAllUsersByLogin, findUserById, updateUser } from '../repositories/userRepository';
+import UserRepository from '../repositories/userRepository';
 import { User } from '../types/User';
+import { UserModel } from '../models/UserModel';
 
+const userRepository = new UserRepository(UserModel, UserDataMapperService);
 class UserService {
     async getUserById(id: string): Promise<User | undefined> {
         try {
-            const user = await findUserById(id);
-            return UserDataMapperService.toService(user);
+            return await userRepository.findUserById(id);
         } catch (err) {
             // Will be improved in [logging and error handling] chapter
             console.error('Error occurred: ', err);
@@ -15,8 +16,7 @@ class UserService {
 
     async getUsersByLogin(login: string, limit: string): Promise<User[] | undefined> {
         try {
-            const users = await findAllUsersByLogin(login, limit);
-            return users.map(UserDataMapperService.toService);
+            return await userRepository.findAllUsersByLogin(login, limit);
         } catch (err) {
             console.error('Error occurred: ', err);
         }
@@ -24,7 +24,7 @@ class UserService {
 
     async postUser(user: User) {
         try {
-            await createUser(UserDataMapperService.toDataBase(user));
+            await userRepository.createUser(user);
         } catch (err) {
             console.error('Error occurred: ', err);
         }
@@ -32,8 +32,7 @@ class UserService {
 
     async editUser(id: string, userFromBody: User) {
         try {
-            const dbUser = await findUserById(id);
-            await updateUser(dbUser, UserDataMapperService.toDataBase(userFromBody));
+            await userRepository.updateUser(id, userFromBody);
         } catch (err) {
             console.error('Error occurred: ', err);
         }
@@ -41,8 +40,8 @@ class UserService {
 
     async deleteUser(id: string) {
         try {
-            const dbUser = await findUserById(id);
-            await updateUser(dbUser, { is_deleted: true });
+            const user: User = await userRepository.findUserById(id);
+            await userRepository.updateUser(id, { ...user, isDeleted: true });
         } catch (err) {
             console.error('Error occurred: ', err);
         }
