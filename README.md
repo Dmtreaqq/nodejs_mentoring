@@ -1,3 +1,4 @@
 ## NodeJS Mentoring
 
-### Every folder regarding every task
+### Task 1
+### Task from 2 to 7
