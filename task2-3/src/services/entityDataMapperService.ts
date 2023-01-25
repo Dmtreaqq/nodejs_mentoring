@@ -1,4 +1,4 @@
-export default abstract class EntityDataMapperService {
+export default class EntityDataMapperService {
     toService(dbObject: any) {
         return dbObject;
     }

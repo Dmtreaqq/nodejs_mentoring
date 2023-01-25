@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS groups;
 
 CREATE TABLE users (
 	id text PRIMARY KEY,
@@ -6,6 +7,12 @@ CREATE TABLE users (
 	password text,
 	age int,
 	is_deleted boolean
+);
+
+CREATE TABLE groups (
+	id text PRIMARY KEY,
+	name text,
+	permissions text []
 );
 
 INSERT INTO
