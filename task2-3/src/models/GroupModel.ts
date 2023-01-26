@@ -1,14 +1,6 @@
-import { Sequelize, Model, DataTypes, InferAttributes, InferCreationAttributes } from 'sequelize';
-import config from '../config';
+import { Model, DataTypes, InferAttributes, InferCreationAttributes } from 'sequelize';
 import { Permission } from '../types/Permission';
-
-export const sequelize = new Sequelize({
-    database: config.dbName,
-    username: config.dbUserName,
-    password: config.dbPass,
-    host: config.dbHost,
-    dialect: 'postgres'
-});
+import { sequelize } from '../loaders/db';
 
 export interface IGroupModel extends Model<InferAttributes<IGroupModel>, InferCreationAttributes<IGroupModel>> {
   id: string;

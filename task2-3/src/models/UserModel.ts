@@ -1,13 +1,5 @@
-import { Sequelize, Model, DataTypes, InferAttributes, InferCreationAttributes } from 'sequelize';
-import config from '../config';
-
-export const sequelize = new Sequelize({
-    database: config.dbName,
-    username: config.dbUserName,
-    password: config.dbPass,
-    host: config.dbHost,
-    dialect: 'postgres'
-});
+import { Model, DataTypes, InferAttributes, InferCreationAttributes } from 'sequelize';
+import { sequelize } from '../loaders/db';
 
 export interface IUserModel extends Model<InferAttributes<IUserModel>, InferCreationAttributes<IUserModel>> {
   id: string;
