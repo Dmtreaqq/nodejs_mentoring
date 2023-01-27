@@ -2,6 +2,7 @@ import { ModelStatic } from 'sequelize';
 import { IGroupModel } from '../models/GroupModel';
 import EntityDataMapperService from '../services/entityDataMapperService';
 import { Group } from '../types/Group';
+import { addUsersToGroup } from '../utils/addUsersToGroup';
 
 export default class GroupRepository {
     private model: ModelStatic<IGroupModel>;
@@ -34,5 +35,9 @@ export default class GroupRepository {
     async destroyGroup(id: string): Promise<void> {
         const group = await this.model.findByPk(id);
         await group?.destroy();
+    }
+
+    async applyUsersToGroup(groupId: string, usersId: string[]): Promise<void> {
+        await addUsersToGroup(groupId, usersId);
     }
 }

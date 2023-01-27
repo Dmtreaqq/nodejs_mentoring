@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { v4 as uuid } from 'uuid';
 import groupService from '../services/groupService';
 import { Group } from '../types/Group';
+import { addUsersToGroup } from '../utils/addUsersToGroup';
 
 export const groupRouter = express.Router();
 
@@ -41,4 +42,12 @@ groupRouter.route('/:id')
         const { id } = req.group;
         await groupService.deleteGroup(id);
         return res.json(`Group with id ${id} successfully deleted`);
+    });
+
+groupRouter.route('/:id/add-users')
+    .post(async (req: Request, res: Response) => {
+        const { users_id } = req.body;
+        const { id: group_id } = req.group;
+        await groupService.postUsersToGroup(group_id, users_id);
+        res.send(`Group with id ${group_id} was assigned to users with id: ${users_id}`);
     });

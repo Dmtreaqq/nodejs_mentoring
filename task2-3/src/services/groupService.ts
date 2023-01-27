@@ -1,6 +1,6 @@
 import GroupRepository from '../repositories/groupRepository';
 import { Group } from '../types/Group';
-import { GroupModel } from '../models/GroupModel';
+import { GroupModel } from '../models/index';
 import EntityDataMapperService from './entityDataMapperService';
 
 const entityMapperService = new EntityDataMapperService();
@@ -26,6 +26,14 @@ class GroupService {
     async postGroup(group: Group) {
         try {
             await groupRepository.createGroup(group);
+        } catch (err) {
+            console.error('Error occurred: ', err);
+        }
+    }
+
+    async postUsersToGroup(groupId: string, usersId: string[]) {
+        try {
+            await groupRepository.applyUsersToGroup(groupId, usersId);
         } catch (err) {
             console.error('Error occurred: ', err);
         }

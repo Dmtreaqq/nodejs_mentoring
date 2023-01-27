@@ -25,3 +25,4 @@ export const GroupModel = sequelize.define<IGroupModel>('group', {
 }, {
     timestamps: false
 });
+
