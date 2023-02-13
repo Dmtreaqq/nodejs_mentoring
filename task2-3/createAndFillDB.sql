@@ -3,22 +3,22 @@ DROP TABLE IF EXISTS groups;
 DROP TABLE IF EXISTS user_group;
 
 CREATE TABLE users (
-	id text PRIMARY KEY,
-	login text,
-	password text,
+	id varchar(36) PRIMARY KEY,
+	login varchar(255),
+	password varchar(255),
 	age int,
 	is_deleted boolean
 );
 
 CREATE TABLE groups (
-	id text PRIMARY KEY,
-	name text,
-	permissions text []
+	id varchar(36) PRIMARY KEY,
+	name varchar(255),
+	permissions varchar(255) []
 );
 
 CREATE TABLE user_group (
-  user_id text,
-  group_id text,
+  user_id varchar(36),
+  group_id varchar(36),
   PRIMARY KEY (user_id, group_id),
   CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id),
   CONSTRAINT fk_group FOREIGN KEY(group_id) REFERENCES groups(id) ON DELETE CASCADE
