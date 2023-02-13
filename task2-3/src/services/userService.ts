@@ -1,7 +1,7 @@
 import UserDataMapperService from './userDataMapperService';
 import UserRepository from '../repositories/userRepository';
 import { User } from '../types/User';
-import { UserModel } from '../models/UserModel';
+import { UserModel } from '../models/index';
 
 const userRepository = new UserRepository(UserModel, UserDataMapperService);
 class UserService {
