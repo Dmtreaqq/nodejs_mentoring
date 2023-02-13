@@ -1,10 +1,12 @@
 import express from 'express';
+import { httpMethodLogger } from './middleware/httpMethodLogger';
 import { groupRouter } from './routers/groupRouter';
 import { userRouter } from './routers/userRouter';
 
 export const app = express();
 
 app.use(express.json());
+app.use(httpMethodLogger);
 
 app.use('/users', userRouter);
 app.use('/groups', groupRouter);
