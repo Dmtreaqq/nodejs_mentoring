@@ -7,7 +7,8 @@ export const sequelize = new Sequelize({
     username: config.dbUserName,
     password: config.dbPass,
     host: config.dbHost,
-    dialect: 'postgres'
+    dialect: 'postgres',
+    logging: false
 });
 
 const checkDB = async () => {
