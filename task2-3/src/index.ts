@@ -1,22 +1,20 @@
 import { app } from './app';
 import config from './config/index';
 import { sequelize } from './loaders/db';
-import logger from './middleware/logger';
+import { terminate } from './utils/terminateServer';
 
 const PORT = config.apiPort || 3000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server was started at port ${PORT}`);
 }).on('close', () => {
     sequelize.close();
+    console.log('SQL connection closed');
 });
 
-process.on('unhandledRejection', (reason) => {
-    logger.error('unhandledRejection', reason);
-});
+const exitHandler = terminate(server);
 
-process.on('uncaughtException', (err) => {
-    logger.error('UncaughtException', err.message);
-    logger.error(err);
-    process.exit(1);
-});
+process.on('uncaughtException', exitHandler(1, 'Unexpected Error'));
+process.on('unhandledRejection', exitHandler(1, 'Unhandled Promise'));
+process.on('SIGTERM', exitHandler(0, 'SIGTERM'));
+process.on('SIGINT', exitHandler(0, 'SIGINT'));
