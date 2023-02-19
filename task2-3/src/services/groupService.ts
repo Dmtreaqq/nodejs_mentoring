@@ -9,9 +9,17 @@ const groupRepository = new GroupRepository(GroupModel, entityMapperService);
 class GroupService {
     async getGroupById(id: string): Promise<Group | undefined> {
         try {
-            return await groupRepository.findGroupById(id);
+            const group = await groupRepository.findGroupById(id);
+
+            if (!group) {
+                throw new Error('There is no such group');
+            }
+
+            return group;
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.stack);
+            }
         }
     }
 
@@ -19,7 +27,9 @@ class GroupService {
         try {
             return await groupRepository.findAllGroups();
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.stack);
+            }
         }
     }
 
@@ -27,7 +37,9 @@ class GroupService {
         try {
             await groupRepository.createGroup(group);
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.stack);
+            }
         }
     }
 
@@ -35,7 +47,9 @@ class GroupService {
         try {
             await groupRepository.applyUsersToGroup(groupId, usersId);
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.stack);
+            }
         }
     }
 
@@ -43,7 +57,9 @@ class GroupService {
         try {
             await groupRepository.updateGroup(id, userFromBody);
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.stack);
+            }
         }
     }
 
@@ -51,7 +67,9 @@ class GroupService {
         try {
             await groupRepository.destroyGroup(id);
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.stack);
+            }
         }
     }
 }
