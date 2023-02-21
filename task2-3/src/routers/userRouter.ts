@@ -15,7 +15,7 @@ userRouter.param('id', async (req: Request, res: Response, next, id) => {
     if (user) req.user = user;
     else {
         res.status(404);
-        return res.send({ message: `User with id ${id} was not found` });
+        return res.json({ message: `User with id ${id} was not found` });
     }
     next();
 });
@@ -32,7 +32,7 @@ userRouter.route('/')
             const user: User = { ...req.body, id: uuid() };
             await userService.postUser(user);
             res.status(201);
-            return res.send(`User with id ${user.id} successfully created`);
+            return res.json({ message: `User with id ${user.id} successfully created` });
         });
 
 userRouter.route('/:id')

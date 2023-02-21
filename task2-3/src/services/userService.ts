@@ -8,9 +8,16 @@ const userRepository = new UserRepository(UserModel, UserDataMapperService);
 class UserService {
     async getUserById(id: string): Promise<User | undefined> {
         try {
-            return await userRepository.findUserById(id);
+            const user = await userRepository.findUserById(id);
+            if (!user) {
+                throw new Error('There is no such user');
+            }
+
+            return user;
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.stack);
+            }
         }
     }
 
@@ -18,7 +25,9 @@ class UserService {
         try {
             return await userRepository.findAllUsersByLogin(login, limit);
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.message);
+            }
         }
     }
 
@@ -26,7 +35,9 @@ class UserService {
         try {
             await userRepository.createUser(user);
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.message);
+            }
         }
     }
 
@@ -34,7 +45,9 @@ class UserService {
         try {
             await userRepository.updateUser(id, userFromBody);
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.message);
+            }
         }
     }
 
@@ -43,7 +56,9 @@ class UserService {
             const user: User = await userRepository.findUserById(id);
             await userRepository.updateUser(id, { ...user, isDeleted: true });
         } catch (err) {
-            logger.error('Error occurred: ', err);
+            if (err && err instanceof Error) {
+                logger.error(err.message);
+            }
         }
     }
 }

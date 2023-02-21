@@ -3,7 +3,11 @@ import { User } from '../types/User';
 import EntityDataMapperService from './entityDataMapperService';
 
 class UserDataMapperService extends EntityDataMapperService {
-    toService(dbUser: IUserModel): User {
+    toService(dbUser: IUserModel): User | null {
+        if (dbUser === null) {
+            return null;
+        }
+
         return {
             id: dbUser.id,
             age: dbUser.age,

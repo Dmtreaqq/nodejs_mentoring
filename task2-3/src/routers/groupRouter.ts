@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import { v4 as uuid } from 'uuid';
 import groupService from '../services/groupService';
 import { Group } from '../types/Group';
-import { addUsersToGroup } from '../utils/addUsersToGroup';
 
 export const groupRouter = express.Router();
 
@@ -11,7 +10,8 @@ groupRouter.param('id', async (req: Request, res: Response, next, id) => {
 
     if (group) req.group = group;
     else {
-        return res.send(`Group with id ${id} was not found`);
+        res.status(404);
+        return res.json({ message: `Group with id ${id} was not found` });
     }
     next();
 });
@@ -24,7 +24,7 @@ groupRouter.route('/')
         const group: Group = { ...req.body, id: uuid() };
         await groupService.postGroup(group);
         res.status(201);
-        return res.send(`Group with id ${group.id} successfully created`);
+        return res.json({ message: `Group with id ${group.id} successfully created` });
     });
 
 groupRouter.route('/:id')
@@ -36,12 +36,12 @@ groupRouter.route('/:id')
         const { id } = req.group;
         const group = req.body;
         await groupService.editGroup(id, group);
-        return res.json(`Group with id ${group.id} successfully edited`);
+        return res.json({ message: `Group with id ${group.id} successfully edited` });
     })
     .delete(async (req: Request, res: Response) => {
         const { id } = req.group;
         await groupService.deleteGroup(id);
-        return res.json(`Group with id ${id} successfully deleted`);
+        return res.json({ message: `Group with id ${id} successfully deleted` });
     });
 
 groupRouter.route('/:id/add-users')
@@ -49,5 +49,5 @@ groupRouter.route('/:id/add-users')
         const { users_id } = req.body;
         const { id: group_id } = req.group;
         await groupService.postUsersToGroup(group_id, users_id);
-        res.send(`Group with id ${group_id} was assigned to users with id: ${users_id}`);
+        return res.json({ message: `Group with id ${group_id} was assigned to users with id: ${users_id}` });
     });
