@@ -5,6 +5,7 @@ import { UserRequestSchema, validator } from '../middleware/validator';
 import { UserValidationSchema } from '../schemas/User';
 import { User } from '../types/User';
 import { validateDefaultQueryParams } from '../middleware/validateDefaultQueryParams';
+import { validateToken } from '../middleware/validateToken';
 import userService from '../services/userService';
 
 export const userRouter = express.Router();
@@ -21,7 +22,7 @@ userRouter.param('id', async (req: Request, res: Response, next, id) => {
 });
 
 userRouter.route('/')
-    .get(validateDefaultQueryParams, async (req: Request, res: Response) => {
+    .get(validateToken, validateDefaultQueryParams, async (req: Request, res: Response) => {
         const { limit, filter } = req.query;
         const users = await userService.getUsersByLogin(String(filter), String(limit));
         return res.json(users);
