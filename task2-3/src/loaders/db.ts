@@ -1,20 +1,22 @@
 import { Sequelize } from 'sequelize';
 import config from '../config/index';
+import logger from '../middleware/logger';
 
 export const sequelize = new Sequelize({
     database: config.dbName,
     username: config.dbUserName,
     password: config.dbPass,
     host: config.dbHost,
-    dialect: 'postgres'
+    dialect: 'postgres',
+    logging: false
 });
 
 const checkDB = async () => {
     try {
         await sequelize.authenticate();
-        console.log('Connection has been established successfully.');
+        logger.info('Connection has been established successfully.');
     } catch (error) {
-        console.error('Unable to connect to the database:', error);
+        logger.error('Unable to connect to the database:', error);
     }
 };
 

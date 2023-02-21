@@ -2,6 +2,7 @@ import GroupRepository from '../repositories/groupRepository';
 import { Group } from '../types/Group';
 import { GroupModel } from '../models/index';
 import EntityDataMapperService from './entityDataMapperService';
+import logger from '../middleware/logger';
 
 const entityMapperService = new EntityDataMapperService();
 const groupRepository = new GroupRepository(GroupModel, entityMapperService);
@@ -10,8 +11,7 @@ class GroupService {
         try {
             return await groupRepository.findGroupById(id);
         } catch (err) {
-            // Will be improved in [logging and error handling] chapter
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 
@@ -19,7 +19,7 @@ class GroupService {
         try {
             return await groupRepository.findAllGroups();
         } catch (err) {
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 
@@ -27,7 +27,7 @@ class GroupService {
         try {
             await groupRepository.createGroup(group);
         } catch (err) {
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 
@@ -35,7 +35,7 @@ class GroupService {
         try {
             await groupRepository.applyUsersToGroup(groupId, usersId);
         } catch (err) {
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 
@@ -43,7 +43,7 @@ class GroupService {
         try {
             await groupRepository.updateGroup(id, userFromBody);
         } catch (err) {
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 
@@ -51,7 +51,7 @@ class GroupService {
         try {
             await groupRepository.destroyGroup(id);
         } catch (err) {
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 }

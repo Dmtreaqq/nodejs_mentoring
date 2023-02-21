@@ -2,6 +2,7 @@ import UserDataMapperService from './userDataMapperService';
 import UserRepository from '../repositories/userRepository';
 import { User } from '../types/User';
 import { UserModel } from '../models/index';
+import logger from '../middleware/logger';
 
 const userRepository = new UserRepository(UserModel, UserDataMapperService);
 class UserService {
@@ -9,8 +10,7 @@ class UserService {
         try {
             return await userRepository.findUserById(id);
         } catch (err) {
-            // Will be improved in [logging and error handling] chapter
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 
@@ -18,7 +18,7 @@ class UserService {
         try {
             return await userRepository.findAllUsersByLogin(login, limit);
         } catch (err) {
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 
@@ -26,7 +26,7 @@ class UserService {
         try {
             await userRepository.createUser(user);
         } catch (err) {
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 
@@ -34,7 +34,7 @@ class UserService {
         try {
             await userRepository.updateUser(id, userFromBody);
         } catch (err) {
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 
@@ -43,7 +43,7 @@ class UserService {
             const user: User = await userRepository.findUserById(id);
             await userRepository.updateUser(id, { ...user, isDeleted: true });
         } catch (err) {
-            console.error('Error occurred: ', err);
+            logger.error('Error occurred: ', err);
         }
     }
 }
