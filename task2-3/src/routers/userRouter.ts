@@ -23,7 +23,6 @@ userRouter.param('id', async (req: Request, res: Response, next, id) => {
 userRouter.route('/')
     .get(validateDefaultQueryParams, async (req: Request, res: Response) => {
         const { limit, filter } = req.query;
-        // const suggestedUsers = getAutoSuggestUsers(String(filter), String(limit));
         const users = await userService.getUsersByLogin(String(filter), String(limit));
         return res.json(users);
     })
