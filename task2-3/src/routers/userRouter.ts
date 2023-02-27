@@ -27,7 +27,7 @@ userRouter.route('/')
         const users = await userService.getUsersByLogin(String(filter), String(limit));
         return res.json(users);
     })
-    .post(validator.body(UserValidationSchema),
+    .post(validateToken, validator.body(UserValidationSchema),
         async (req: ValidatedRequest<UserRequestSchema>, res: Response) => {
             const user: User = { ...req.body, id: uuid() };
             await userService.postUser(user);
@@ -36,12 +36,12 @@ userRouter.route('/')
         });
 
 userRouter.route('/:id')
-    .get(async (req: Request, res: Response) => {
+    .get(validateToken, async (req: Request, res: Response) => {
         const userById = req.user;
 
         return res.json(userById);
     })
-    .put(validator.body(UserValidationSchema),
+    .put(validateToken, validator.body(UserValidationSchema),
         async (req: ValidatedRequest<UserRequestSchema>, res: Response) => {
             const userById = req.user;
             const { id } = userById;
@@ -51,7 +51,7 @@ userRouter.route('/:id')
 
             return res.json(`User with id ${id} successfully edited`);
         })
-    .delete(async (req: Request, res: Response) => {
+    .delete(validateToken, async (req: Request, res: Response) => {
         const userById = req.user;
         const { id } = userById;
 
