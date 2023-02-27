@@ -22,11 +22,33 @@ userRouter.param('id', async (req: Request, res: Response, next, id) => {
 });
 
 userRouter.route('/')
+/**
+ * @openapi
+ * /users:
+ *   get:
+ *     description: Get all users
+ *     tags:
+ *      - User
+ *     responses:
+ *       200:
+ *         description: Returns users array.
+ */
     .get(validateToken, validateDefaultQueryParams, async (req: Request, res: Response) => {
         const { limit, filter } = req.query;
         const users = await userService.getUsersByLogin(String(filter), String(limit));
         return res.json(users);
     })
+/**
+ * @openapi
+ * /users:
+ *   post:
+ *     description: Creates new user
+ *     tags:
+ *      - User
+ *     responses:
+ *       201:
+ *         description: Nothing returned.
+ */
     .post(validateToken, validator.body(UserValidationSchema),
         async (req: ValidatedRequest<UserRequestSchema>, res: Response) => {
             const user: User = { ...req.body, id: uuid() };
