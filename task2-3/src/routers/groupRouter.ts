@@ -30,8 +30,8 @@ groupRouter.route('/')
 
 groupRouter.route('/:id')
     .get(validateToken, async (req: Request, res: Response) => {
-        const { id } = req.group;
-        return res.json(await groupService.getGroupById(id));
+        const groupById = req.group;
+        return res.json(groupById);
     })
     .put(validateToken, async (req: Request, res: Response) => {
         const { id } = req.group;
