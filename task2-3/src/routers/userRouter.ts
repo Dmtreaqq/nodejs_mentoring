@@ -49,7 +49,7 @@ userRouter.route('/:id')
 
             await userService.editUser(id, userFromBody);
 
-            return res.json(`User with id ${id} successfully edited`);
+            return res.json({ message: `User with id ${id} successfully edited` });
         })
     .delete(validateToken, async (req: Request, res: Response) => {
         const userById = req.user;
@@ -57,5 +57,5 @@ userRouter.route('/:id')
 
         await userService.deleteUser(id);
 
-        return res.json(`User with id ${id} successfully deleted`);
+        return res.json({ message: `User with id ${id} successfully deleted` });
     });

@@ -3,8 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import userService from '../../../services/userService';
 import { createServer } from '../../createServer';
 import { userRouter } from '../../../routers/userRouter';
-import { users } from '../../mocks/usersMock';
-import { user } from '../../mocks/usersMock';
+import { users, user } from '../../mocks/usersMock';
 
 jest.mock('../../../services/userService', () => ({
     getUsersByLogin: jest.fn(),
@@ -30,6 +29,10 @@ jest.mock('../../../middleware/validator', () => ({
     }
 }));
 
+jest.mock('uuid', () => ({
+    v4: () => '1'
+}));
+
 beforeEach(() => {
     jest.spyOn(userService, 'getUsersByLogin').mockResolvedValue(users);
     jest.spyOn(userService, 'postUser').mockResolvedValue({} as any);
@@ -48,6 +51,7 @@ describe('User router tests', () => {
     });
 
     it('should POST user', async () => {
+        const generatedId = '1';
         const userWithoutId = {
             isDeleted: false,
             age: 22,
@@ -62,6 +66,8 @@ describe('User router tests', () => {
         expect(userService.postUser).toHaveBeenCalledWith(expect.objectContaining(userWithoutId));
         expect(userService.postUser).toBeCalledTimes(1);
         expect(response.statusCode).toBe(201);
+        expect(response.text)
+            .toEqual(JSON.stringify({ message: `User with id ${generatedId} successfully created` }));
     });
 
     it('should DELETE user by ID', async () => {
@@ -72,16 +78,20 @@ describe('User router tests', () => {
         expect(userService.deleteUser).toHaveBeenCalledWith(userId);
         expect(userService.deleteUser).toBeCalledTimes(1);
         expect(response.statusCode).toBe(200);
+        expect(response.text)
+            .toEqual(JSON.stringify({ message: `User with id ${userId} successfully deleted` }));
     });
 
     it('should return 404 when user not found while DELETE user by ID', async () => {
         const userId = '1';
+        jest.spyOn(userService, 'getUserById').mockResolvedValue(undefined);
 
         const response = await request(app).delete(`/users/${userId}`);
 
-        expect(userService.deleteUser).toHaveBeenCalledWith(userId);
-        expect(userService.deleteUser).toBeCalledTimes(1);
-        expect(response.statusCode).toBe(200);
+        expect(userService.deleteUser).toBeCalledTimes(0);
+        expect(response.statusCode).toBe(404);
+        expect(response.text)
+            .toEqual(JSON.stringify({ message: `User with id ${userId} was not found` }));
     });
 
     it('should PUT user by ID', async () => {
@@ -91,20 +101,25 @@ describe('User router tests', () => {
             .put(`/users/${userId}`)
             .send(user);
 
-        expect(userService.editUser).toHaveBeenCalledWith(user.id, user);
+        expect(userService.editUser).toHaveBeenCalledWith(userId, user);
         expect(userService.editUser).toBeCalledTimes(1);
         expect(response.statusCode).toBe(200);
+        expect(response.text)
+            .toEqual(JSON.stringify({ message: `User with id ${userId} successfully edited` }));
     });
 
     it('should return 404 when user not found while PUT user by ID', async () => {
         const userId = '1';
         jest.spyOn(userService, 'getUserById').mockResolvedValue(undefined);
 
-        const response = await request(app).put(`/users/${userId}`);
+        const response = await request(app)
+            .put(`/users/${userId}`)
+            .send(user);
 
-        expect(userService.getUserById).toHaveBeenCalledWith(userId);
-        expect(userService.getUserById).toBeCalledTimes(1);
+        expect(userService.editUser).toBeCalledTimes(0);
         expect(response.statusCode).toBe(404);
+        expect(response.text)
+            .toEqual(JSON.stringify({ message: `User with id ${userId} was not found` }));
     });
 
     it('should GET user by ID', async () => {
@@ -136,7 +151,7 @@ describe('User router tests', () => {
 
         const response = await request(app).get('/users');
 
-        expect(userService.getUsersByLogin).toHaveBeenCalledWith(String(default_filter), default_limit);
+        expect(userService.getUsersByLogin).toHaveBeenCalledWith(default_filter, default_limit);
         expect(userService.getUsersByLogin).toBeCalledTimes(1);
         expect(response.statusCode).toBe(200);
     });
